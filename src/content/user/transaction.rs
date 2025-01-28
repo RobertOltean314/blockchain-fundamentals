@@ -6,21 +6,23 @@ pub struct Transaction {
     pub sender: String,
     pub receiver: String,
     pub amount: f64,
-    pub signature: String,  
+    pub fee: f64,
+    pub signature: String,
 }
 
 impl Transaction {
-    pub fn new(sender: &str, receiver: &str, amount: f64) -> Self {
+    pub fn new(sender: &str, receiver: &str, amount: f64, fee: f64) -> Self {
         Transaction {
             sender: sender.to_string(),
             receiver: receiver.to_string(),
             amount,
+            fee,
             signature: String::new(),
         }
     }
 
     pub fn hash(&self) -> Vec<u8> {
-        let data = format!("{}{}{}", self.sender, self.receiver, self.amount);
+        let data = format!("{}{}{}{}", self.sender, self.receiver, self.amount, self.fee);
         sha2::Sha256::digest(data.as_bytes()).to_vec()
     }
 }

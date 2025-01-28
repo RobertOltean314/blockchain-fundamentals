@@ -10,13 +10,14 @@ use super::Transaction;
 pub struct Wallet {
     secret_key: SecretKey, 
     pub public_key: PublicKey,
+    pub is_miner: bool
 }
 
 impl Wallet {
-    pub fn new() -> Self {
+    pub fn new(is_miner: bool) -> Self {
         let secp = Secp256k1::new();
         let (secret_key, public_key) = secp.generate_keypair(&mut OsRng);
-        Wallet { secret_key, public_key }
+        Wallet { secret_key, public_key, is_miner }
     }
 
     pub fn address(&self) -> String {
@@ -31,16 +32,18 @@ impl Wallet {
     }
 
     pub fn send_money(&self, receiver: &Wallet, amount: f64, blockchain: &mut Blockchain) -> Result<(), String> {
-        let sender_balance = blockchain.get_balance(&self.address());
+        let fee = amount * 0.00686;
 
-        if sender_balance < amount {
+        let sender_balance = blockchain.get_balance(&self.address());
+        if sender_balance < amount + fee {
             return Err(format!("Address: {} does not have enough funds", self.address()).to_string());
         }
 
         let mut tx = Transaction::new(
             &self.address(),
             &receiver.address(),
-            amount
+            amount,
+            fee
         );
 
         let tx_hash = tx.hash();
@@ -49,6 +52,10 @@ impl Wallet {
     
         blockchain.mempool.push(tx);
         blockchain.mine_pending_transactions(&self.address());
+
+        if self.is_miner {
+            blockchain.mine_pending_transactions(&self.address());
+        }
 
         Ok(())
     }

@@ -1,4 +1,6 @@
-use crate::content::{blockchain::block::Block, user::transaction::Transaction};  
+use rand::Rng;
+
+use crate::content::{blockchain::block::Block, user::{transaction::Transaction, wallet, Wallet}};  
 
 #[derive(Debug)]
 pub struct Blockchain {
@@ -53,14 +55,30 @@ impl Blockchain {
     }
 
     pub fn mine_pending_transactions(&mut self, miner_address: &str) {
+        let mut block_transactions = Vec::new();
+
         let reward = Transaction::new(
-            "system",
+            "System",
             miner_address,
             6.25, 
+            0.0, 
         );
+        block_transactions.push(reward);
 
-        let mut block_transactions = vec![reward];
-        block_transactions.extend(self.mempool.drain(..));
+        let mut total_fee = 0.0;
+        while let Some(tx) = self.mempool.pop() {
+            block_transactions.push(tx.clone());
+            total_fee += tx.fee;
+        }
+        if total_fee > 0.0 {
+            let fee_reward = Transaction::new(
+                "Fees",
+                miner_address,
+                total_fee,
+                0.0, 
+            );
+            block_transactions.push(fee_reward);
+        }
 
         self.add_block(block_transactions);
     }
@@ -79,5 +97,22 @@ impl Blockchain {
             }
         }
         return balance;
+    }
+
+    pub fn attempt_random_mining(&mut self, wallets: &[Wallet]) {
+        // Filter miners from the list of wallets
+        let miners: Vec<&Wallet> = wallets.iter().filter(|w| w.is_miner).collect();
+        
+        if !miners.is_empty() {
+            // Randomly select a miner
+            let mut rng = rand::rng();
+            let miner = miners[rng.random_range(0..miners.len())];
+            
+            // If there are pending transactions, mine them
+            if !self.mempool.is_empty() {
+                self.mine_pending_transactions(&miner.address());
+                println!("Block mined by miner: {}", miner.address());
+            }
+        }
     }
 }
