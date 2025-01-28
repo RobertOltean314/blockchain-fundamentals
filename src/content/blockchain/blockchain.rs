@@ -1,4 +1,4 @@
-use crate::{content::blockchain::block::Block, content::user::transaction::Transaction};  
+use crate::content::{blockchain::block::Block, user::transaction::Transaction};  
 
 #[derive(Debug)]
 pub struct Blockchain {
@@ -63,5 +63,21 @@ impl Blockchain {
         block_transactions.extend(self.mempool.drain(..));
 
         self.add_block(block_transactions);
+    }
+
+    pub fn get_balance(&self, address: &str) -> f64 {
+        let mut balance = 0.0;
+
+        for block in &self.chain {
+            for transaction in &block.transactions {
+                if transaction.sender == address {
+                    balance -= transaction.amount;
+                }
+                if transaction.receiver == address {
+                    balance += transaction.amount;
+                }
+            }
+        }
+        return balance;
     }
 }
