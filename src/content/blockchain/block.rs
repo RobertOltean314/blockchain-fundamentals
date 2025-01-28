@@ -40,18 +40,18 @@ impl Block {
     }
 
     pub fn calculate_hash(&self) -> String {
-
         let input = format!(
-            "{}{}{:#?}{}{}",
+            "{}{}{:?}{}{:?}",
             self.index,
             self.timestamp,
             self.transactions,
             self.previous_hash,
-            self.nonce);
+            self.nonce
+        );
     
         let mut hasher = Sha256::new();
         hasher.update(input.as_bytes());
         let result = hasher.finalize();
-        return hex::encode(result);
+        hex::encode(result)
     }
 }
