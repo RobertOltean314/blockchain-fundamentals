@@ -1,23 +1,24 @@
 use chrono::Utc;
 use sha2::{Sha256, Digest};
+use crate::content::user::transaction::Transaction;
 
 #[derive(Debug)]
 pub struct Block {
     pub index: u32,
     pub timestamp: i64,
-    pub data: String,
+    pub transactions: Vec<Transaction>,
     pub previous_hash: String,
     pub hash: String,
     pub nonce: u64
 }
 
 impl Block {
-    pub fn new(index: u32, data: String, previous_hash: String, nonce: u64) -> Self {
+    pub fn new(index: u32, transactions: Vec<Transaction>, previous_hash: String, nonce: u64) -> Self {
         let timestamp = Utc::now().timestamp(); 
         let mut block = Block {
             index,
             timestamp,
-            data,
+            transactions,
             previous_hash,
             hash: String::new(), 
             nonce,
@@ -29,10 +30,10 @@ impl Block {
     pub fn calculate_hash(&self) -> String {
 
         let input = format!(
-            "{}{}{}{}{}",
+            "{}{}{:#?}{}{}",
             self.index,
             self.timestamp,
-            self.data,
+            self.transactions,
             self.previous_hash,
             self.nonce);
     

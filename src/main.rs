@@ -1,18 +1,25 @@
-mod block;
-mod blockchain;
+mod content; 
 
-use blockchain::Blockchain;
+use content::blockchain::Blockchain;
+use content::user::{Transaction, Wallet};
 
 fn main() {
-    let mut blockchain = Blockchain::new();
-    println!("Genesis Block Hash: {}", blockchain.chain[0].hash);
-    
-    blockchain.add_block("Alice sends 1 BTC to Bob".to_string(), 2);
-    blockchain.add_block("Bob sends 0.5 BTC to Carol".to_string(), 2);
-    
-    println!("{:#?}", blockchain);
-    println!("Blockchain valid? {}", blockchain.is_valid());  // Should print "true"
-    
-    blockchain.chain[1].data = "Eve sends 100 BTC to herself".to_string();
-    println!("Blockchain valid after tampering? {}", blockchain.is_valid()); // Should print "false"
+    let mut blockchain = Blockchain::new(4);
+    let alice_wallet = Wallet::new();
+    let bob_wallet = Wallet::new();
+
+    let mut tx = Transaction::new(
+        &alice_wallet.address(),
+        &bob_wallet.address(),
+        1.0
+    );
+
+    let tx_hash = tx.hash();
+    let signature = alice_wallet.sign(&tx_hash);
+    tx.signature = hex::encode(signature.serialize_der().as_ref());
+
+    blockchain.mempool.push(tx);
+    blockchain.mine_pending_transactions(&alice_wallet.address());
+
+    println!("Blockchain: {:#?}", blockchain);
 }
