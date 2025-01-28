@@ -6,7 +6,7 @@ use crate::content::blockchain::Blockchain;
 
 use super::Transaction;
 
-#[derive(Debug)]
+#[derive(Debug,  Clone)]
 pub struct Wallet {
     secret_key: SecretKey, 
     pub public_key: PublicKey,

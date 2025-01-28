@@ -1,12 +1,15 @@
 use rand::Rng;
 
+use core::time;
+use std::time::{SystemTime, UNIX_EPOCH};    
 use crate::content::{blockchain::block::Block, user::{transaction::Transaction, wallet, Wallet}};  
 
 #[derive(Debug)]
 pub struct Blockchain {
     pub chain: Vec<Block>,
     pub mempool: Vec<Transaction>,
-    pub difficulty: u32
+    pub difficulty: u32,
+    last_mined_time: u64
 }
 
 impl Blockchain {
@@ -23,7 +26,24 @@ impl Blockchain {
             chain: vec![genesis_block],
             mempool: vec![],
             difficulty,  
+            last_mined_time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs(),
         }
+    }
+
+    pub fn adjust_difficulty(&mut self) {
+        let current_time = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+        let time_diff = current_time - self.last_mined_time;
+        let expected_time = 10; // Assuming we want a block every 10 seconds
+
+        if time_diff < expected_time {
+            self.difficulty += 1;
+        }
+        else if time_diff > expected_time * 2 {
+            if self.difficulty > 1 {
+                self.difficulty -= 1;
+            }
+        }
+        self.last_mined_time = current_time;
     }
 
     pub fn add_block(&mut self, transactions: Vec<Transaction>) {
@@ -81,6 +101,7 @@ impl Blockchain {
         }
 
         self.add_block(block_transactions);
+         self.adjust_difficulty();
     }
 
     pub fn get_balance(&self, address: &str) -> f64 {

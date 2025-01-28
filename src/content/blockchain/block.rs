@@ -27,6 +27,18 @@ impl Block {
         return block;
     }
 
+    pub fn mine_block(&mut self, difficulty: u32) {
+        let target_prefix = "0".repeat(difficulty as usize);
+        loop {
+            self.hash = self.calculate_hash(); 
+            if self.hash.starts_with(&target_prefix) {
+                break;
+            }
+            self.nonce += 1; 
+        }
+        println!("Block mined: {}", self.hash);
+    }
+
     pub fn calculate_hash(&self) -> String {
 
         let input = format!(
@@ -38,23 +50,8 @@ impl Block {
             self.nonce);
     
         let mut hasher = Sha256::new();
-    
         hasher.update(input.as_bytes());
-    
         let result = hasher.finalize();
-    
         return hex::encode(result);
-    }
-
-    pub fn mine_block(&mut self, difficulty: u32) {
-        let target_prefix = "0".repeat(difficulty as usize);
-        loop {
-            self.hash = self.calculate_hash(); 
-            if self.hash.starts_with(&target_prefix) {
-                break;
-            }
-            self.nonce += 1; 
-        }
-        println!("Block mined: {}", self.hash);
     }
 }
