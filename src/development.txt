@@ -1,0 +1,14 @@
+1.Wallet Management & Transactions
+2.Blockchain Explorer
+3.Mining Simulator with Adjustable Difficulty
+4.Smart Contract Engine & Deployment UI
+5.Real-Time Transaction Updates (WebSockets)
+6.Security Features (Key Handling, Signature Validation)
+7.Frontend Polish & UX Enhancements
+
+
+Function	         HTTP Method	    Endpoint
+mine_initial_block	    POST	        /mine/initial
+simulate_transactions	POST	        /transactions/simulate
+simulate_mining	        POST	        /mine/simulate
+print_final_state	    GET	            /blockchain/status
