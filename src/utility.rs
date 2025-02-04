@@ -2,8 +2,9 @@ use crate::content::blockchain::Blockchain;
 use crate::content::user::Wallet;
 use std::sync::{Arc, Mutex};
 use axum::extract::State;
-use axum::Json;
+use axum::{Json, Router};
 use serde_json::json;
+use std::collections::HashMap;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -12,6 +13,7 @@ pub struct AppState {
     pub bob_wallet: Wallet,
     pub miner_wallet1: Wallet,
     pub miner_wallet2: Wallet,
+    pub user_wallets: Arc<Mutex<HashMap<String, Wallet>>>,
 }
 
 pub async fn mine_initial_block(State(state): State<AppState>) -> Json<serde_json::Value> {
@@ -69,6 +71,15 @@ pub async fn print_final_state(State(state): State<AppState>) -> Json<serde_json
             }));
         }
 
+        let user_wallets = state.user_wallets.lock().unwrap();
+        for (username, wallet) in user_wallets.iter() {
+            balances.push(json!({
+                "name": username,
+                "address": wallet.address(),
+                "balance": blockchain.get_balance(&wallet.address())
+            }));
+        }
+
         Json(json!({
             "status": "Blockchain is valid",
             "balances": balances
@@ -76,4 +87,32 @@ pub async fn print_final_state(State(state): State<AppState>) -> Json<serde_json
     } else {
         Json(json!({"status": "Blockchain is not valid."}))
     }
+}
+
+pub async fn create_wallet(State(state): State<AppState>, Json(payload): Json<HashMap<String, String>>) -> Json<serde_json::Value> {
+    let username = match payload.get("username") {
+        Some(name) => name.clone(),
+        None => return Json(json!({"error": "Username is required"})),
+    };
+
+    let wallet = Wallet::new(false);
+    let address = wallet.address();
+
+    let mut user_wallets = state.user_wallets.lock().unwrap();
+    user_wallets.insert(username.clone(), wallet);
+
+    Json(json!({
+        "message": format!("Wallet created for {}", username),
+        "address": address
+    }))
+}
+
+pub fn app_router(app_state: AppState) -> Router {
+    Router::new()
+        .route("/mine/initial", axum::routing::post(mine_initial_block))
+        .route("/transactions/simulate", axum::routing::post(simulate_transactions))
+        .route("/mine/simulate", axum::routing::post(simulate_mining))
+        .route("/blockchain/status", axum::routing::get(print_final_state))
+        .route("/wallet/create", axum::routing::post(create_wallet))
+        .with_state(app_state)
 }
