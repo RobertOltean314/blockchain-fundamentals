@@ -1,5 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};    
-use crate::content::{blockchain::block::Block, user::{transaction::Transaction, wallet, Wallet}};  
+use crate::content::{blockchain::block::Block, user::transaction::Transaction};  
 
 #[derive(Debug)]
 pub struct Blockchain {
