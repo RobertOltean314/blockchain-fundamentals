@@ -4,7 +4,7 @@ use content::blockchain::Blockchain;
 use content::user::Wallet;
 
 fn main() {
-    // Initialize Blockchain with a lower difficulty for demonstration
+    /*Initialize Blockchain with a lower difficulty for demonstration*/
     let mut blockchain = Blockchain::new(1);
 
     // Creating Wallets
