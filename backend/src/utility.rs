@@ -98,12 +98,16 @@ pub async fn create_wallet(State(state): State<AppState>, Json(payload): Json<Ha
     let wallet = Wallet::new(false);
     let address = wallet.address();
 
+    let blockchain = state.blockchain.lock().unwrap();
+    let balance = blockchain.get_balance(&address);
+
     let mut user_wallets = state.user_wallets.lock().unwrap();
-    user_wallets.insert(username.clone(), wallet);
+    user_wallets.insert(username.clone(), wallet.clone());
 
     Json(json!({
-        "message": format!("Wallet created for {}", username),
-        "address": address
+        "name": username,
+        "address": address,
+        "balance": balance
     }))
 }
 
