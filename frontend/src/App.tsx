@@ -1,8 +1,14 @@
-import UserWallet from "./components/UserWallet"
+import UserWallet from "./components/UserWallet";
+import './App.css';
 
 function App() {
   return (
-   <UserWallet/>
-  )
+    <div className="app-container">
+      <div className="card">
+        <UserWallet />
+      </div>
+    </div>
+  );
 }
-export default App
+
+export default App;
