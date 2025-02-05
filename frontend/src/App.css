@@ -1,44 +1,38 @@
-/* Resetare stiluri implicite pentru body */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
   
-  /* Stiluri pentru containerul general */
   .app-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Face ca wrapper-ul să ocupe întreaga înălțime a paginii */
-    background-color: #1a1a1a; /* Negru pentru fundalul paginii */
+    height: 100vh; 
+    background-color: #1a1a1a;
   }
   
-  /* Stiluri pentru card */
   .card {
-    background-color: #ff6f00; /* Portocaliu pentru fundalul cardului */
-    padding: 30px;  /* Creștem padding-ul pentru mai mult spațiu în interior */
+    background-color: #ff6f00;
+    padding: 30px; 
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 100%; /* Cardul va ocupa 100% din lățimea disponibilă */
-    max-width: 600px; /* Cardul nu va depăși 600px lățime */
-    min-width: 350px; /* Cardul nu va fi mai mic de 350px */
+    width: 100%;
+    max-width: 600px;
+    min-width: 350px; 
     text-align: center;
   }
   
-  /* Media query pentru ecrane mai mici de 768px */
   @media (max-width: 768px) {
     .card {
-      padding: 20px; /* Reducem padding-ul pe ecrane mici */
-      min-width: 280px; /* Cardul poate deveni mai mic pe ecrane mici */
+      padding: 20px; 
+      min-width: 280px; 
     }
   }
   
-  /* Media query pentru ecrane mai mici de 480px */
   @media (max-width: 480px) {
     .card {
-      padding: 15px; /* Reducem padding-ul și mai mult pe ecrane foarte mici */
-      min-width: 250px; /* Cardul poate fi și mai mic pe ecrane foarte mici */
-    }
+      padding: 15px;
+      min-width: 250px; 
   }
-  
+}

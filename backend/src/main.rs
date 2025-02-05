@@ -1,9 +1,12 @@
-mod content;
 mod utility;
+mod content;
 
-use content::{blockchain::Blockchain, user::Wallet};
+use axum::http;
+use tower_http::cors::{CorsLayer, Any};
+use http::header::CONTENT_TYPE; // Importă HeaderName și CONTENT_TYPE
 use std::sync::{Arc, Mutex};
 use std::collections::HashMap;
+use content::{blockchain::Blockchain, user::Wallet};
 use utility::{app_router, AppState};
 
 #[tokio::main]
@@ -18,7 +21,12 @@ async fn main() {
     };
 
     // Set up routes using the app_router function
-    let app = app_router(app_state);
+    let app = app_router(app_state)
+        .layer(
+            CorsLayer::new()
+                .allow_origin(Any) // Permite toate origin-urile pentru cereri CORS
+                .allow_headers(vec![CONTENT_TYPE]), // Permite header-ul Content-Type folosind HeaderName
+        );
 
     // Start the server
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000")

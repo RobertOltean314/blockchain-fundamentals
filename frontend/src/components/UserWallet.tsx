@@ -1,91 +1,44 @@
-import { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
-interface Wallet {
-  name: string;
-  address: string;
-  balance: number;
+interface UserWalletProps {
+  setUsername: React.Dispatch<React.SetStateAction<string | null>>;
+  setAddress: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-export default function WalletPage() {
-  const [wallet, setWallet] = useState<Wallet | null>(null);
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(false);
+const UserWallet: React.FC<UserWalletProps> = ({ setUsername, setAddress }) => {
+  const [usernameInput, setUsernameInput] = useState('');
 
-  // Verificăm dacă există un wallet salvat în localStorage
-  useEffect(() => {
-    const storedWallet = localStorage.getItem('wallet');
-    if (storedWallet) {
-      setWallet(JSON.parse(storedWallet));
-    }
-  }, []);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  // Funcția de creare a wallet-ului
-  const handleCreateWallet = async () => {
-    if (!username) {
-      alert('Introdu un nume de utilizator!');
-      return;
-    }
-  
-    setLoading(true);
-  
-    try {
-      const response = await fetch('/wallet/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username }),
-      });
-  
-      if (!response.ok) {
-        throw new Error('Eroare la crearea wallet-ului.');
-      }
-  
-      const newWallet = await response.json();
-      
-      // Log pentru a verifica datele primite de la server
-      console.log('Date primite de la server:', newWallet);
-  
-      localStorage.setItem('wallet', JSON.stringify(newWallet));
-      setWallet(newWallet);
-    } catch (error) {
-      console.error('Eroare:', error);
-      alert('A apărut o problemă la crearea wallet-ului.');
-    } finally {
-      setLoading(false);
+    const response = await fetch('http://localhost:3000/wallet/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: usernameInput }),
+    });
+
+    const data = await response.json();
+    if (data.address) {
+      setUsername(usernameInput);
+      setAddress(data.address);
     }
   };
-  
 
-  // Dacă există un wallet, afișăm detaliile
-  if (wallet) {
-    return (
-      <div className="p-4">
-        <h1 className="text-2xl font-bold">Bine ai venit, {wallet.name}!</h1>
-        <p>Adresa wallet-ului tău: <span className="font-mono">{wallet.address}</span></p>
-        <p>Balans: {wallet.balance} BTC</p>
-      </div>
-    );
-  }
-
-  // Dacă NU există un wallet, afișăm formularul de creare
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Creează-ți un Wallet</h1>
-      <input
-        type="text"
-        placeholder="Introdu numele de utilizator"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-        className="border p-2 my-2 w-full rounded"
-      />
-      <button
-        onClick={handleCreateWallet}
-        disabled={loading}
-        className="bg-blue-500 text-white p-2 rounded w-full"
-      >
-        {loading ? 'Se creează...' : 'Creează Wallet'}
-      </button>
+    <div>
+      <h2>Crează un wallet</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Introduceti un nume"
+          value={usernameInput}
+          onChange={(e) => setUsernameInput(e.target.value)}
+          required
+        />
+        <button type="submit">Creează Wallet</button>
+      </form>
     </div>
   );
-}
+};
+
+export default UserWallet;
